@@ -8,7 +8,7 @@ build-type:      Simple
 
 library
     build-depends:    base
-    extra-modules:
+    other-modules:
         Graphics.Gnuplot.DSL
     hs-source-dirs:   src
     default-language: GHC2021
