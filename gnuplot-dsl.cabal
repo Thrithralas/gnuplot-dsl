@@ -10,5 +10,6 @@ library
     build-depends:    base
     other-modules:
         Graphics.Gnuplot.DSL
+        Graphics.Gnuplot.DSL.Arrow
     hs-source-dirs:   src
     default-language: GHC2021
