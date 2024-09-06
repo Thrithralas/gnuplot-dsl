@@ -1,12 +1,14 @@
 cabal-version:   3.0
 name:            gnuplot-dsl
 version:         0.1.0.0
-license:         NONE
-author:          Joe
+license:         MIT
+author:          Márton Petes
 maintainer:      tx0lwm@inf.elte.hu
 build-type:      Simple
 
 library
     build-depends:    base
+    extra-modules:
+        Graphics.Gnuplot.DSL
     hs-source-dirs:   src
     default-language: GHC2021
