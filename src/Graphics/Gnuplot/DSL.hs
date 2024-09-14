@@ -2,20 +2,29 @@ module Graphics.Gnuplot.DSL (module Gnuplot) where
 
 import Graphics.Gnuplot.DSL.Drawable as Gnuplot (
   GDrawable,
-  Style(..),
   GnuplotDrawable,
+  Style (..),
+  withStyle,
   withXDomain,
   withYDomain,
   withZDomain,
-  withStyle
-  )
+ )
 
 import Graphics.Gnuplot.DSL.Expr as Gnuplot (
   GExpr,
   func,
-  ground,
+  gceil,
   gfloor,
-  gceil
-  )
+  ground,
+ )
 
-import Graphics.Gnuplot.DSL.Process as Gnuplot (plot)
+import Graphics.Gnuplot.DSL.Process as Gnuplot (
+  gnuplotExec,
+  plot,
+  plotDebug,
+  plotWithInit,
+ )
+
+import Graphics.Gnuplot.DSL.Command as Gnuplot (
+  GCommand (..),
+ )

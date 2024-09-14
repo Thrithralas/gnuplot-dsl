@@ -1,10 +1,10 @@
 {-# LANGUAGE TypeFamilies #-}
+
 module Graphics.Gnuplot.DSL.Expr where
 
 import Data.Data
-import GHC.Generics
 import Data.Default
-
+import GHC.Generics
 
 data GExpr a
   = Lit a
@@ -18,7 +18,7 @@ data GExpr a
   deriving (Generic, Typeable, Data, Functor)
 
 instance Default (GExpr a) where
-    def = Var "x"
+  def = Var "x"
 
 func :: String -> GExpr a -> GExpr a
 func = (:$)
@@ -53,7 +53,6 @@ instance Floating a => Floating (GExpr a) where
   asinh = func "asinh"
   acosh = func "acosh"
   atanh = func "atanh"
-
 
 ground, gceil, gfloor :: GExpr a -> GExpr a
 ground = func "round"

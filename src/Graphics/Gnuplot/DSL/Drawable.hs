@@ -1,21 +1,26 @@
-{-# LANGUAGE RecordWildCards, UndecidableInstances #-}
+{-# LANGUAGE OverloadedLists #-}
+{-# LANGUAGE UndecidableInstances #-}
+
 module Graphics.Gnuplot.DSL.Drawable (
-  Style(..),
-  GDrawable(..),
-  GnuplotDrawable(..),
+  Style (..),
+  GDrawable (..),
+  GnuplotDrawable (..),
+  RangeComp (..),
   withXDomain,
   withYDomain,
   withZDomain,
   withStyle,
-  constructCommand
-) where
+  withNOOP,
+)
+where
 
-import Graphics.Gnuplot.DSL.Expr
+import Control.Applicative
+import Data.Char
 import Data.Default
 import Data.List
-import Control.Applicative
+import GHC.Exts
 import GHC.Generics
-import Data.Char
+import Graphics.Gnuplot.DSL.Expr
 
 data Style
   = Lines
@@ -31,23 +36,33 @@ data Style
   | YErr
   deriving (Show, Generic)
 
+data RangeComp a
+  = RLit a
+  | Auto
+  deriving (Generic)
+
+instance Show a => Show (RangeComp a) where
+  show (RLit a) = show a
+  show Auto = "*"
+
+instance Default (RangeComp a) where
+  def = Auto
+
 instance Default Style where
   def = Lines
 
-
-data GDrawable = MkGDrawable {
-  expr :: GExpr Double,
-  xDomain :: Maybe (Double, Double),
-  yDomain :: Maybe (Double, Double),
-  zDomain :: Maybe (Double, Double),
-  style :: Style,
-  threeDimensions :: Bool
-                                         }
+data GDrawable = MkGDrawable
+  { expr :: GExpr Double,
+    xDomain :: Maybe (RangeComp Double, RangeComp Double),
+    yDomain :: Maybe (RangeComp Double, RangeComp Double),
+    zDomain :: Maybe (RangeComp Double, RangeComp Double),
+    style :: Style,
+    threeDimensions :: Bool
+  }
   deriving (Show, Generic)
 
 instance Default GDrawable where
   def = MkGDrawable def def def def def False
-
 
 class GnuplotDrawable c where
   toGDrawables :: (GDrawable -> GDrawable) -> c -> [GDrawable]
@@ -55,47 +70,28 @@ class GnuplotDrawable c where
 instance GnuplotDrawable GDrawable where
   toGDrawables f = singleton . f
 
-instance GnuplotDrawable c => GnuplotDrawable [c] where
+instance GnuplotDrawable g => GnuplotDrawable [g] where
   toGDrawables f = concatMap (toGDrawables f)
 
 instance (Real a, p ~ GExpr a) => GnuplotDrawable (p -> p) where
-  toGDrawables g f = [g $ def { expr = fmap (fromRational . toRational) $ f $ Var "x" }]
+  toGDrawables g f = [g $ def{expr = fmap (fromRational . toRational) $ f $ Var "x"}]
 
 instance (Real a, p ~ GExpr a) => GnuplotDrawable (p -> p -> p) where
-  toGDrawables g f = [g $ def { expr = fromRational . toRational <$> f (Var "x") (Var "y"), threeDimensions = True }]
+  toGDrawables g f = [g $ def{expr = fromRational . toRational <$> f (Var "x") (Var "y"), threeDimensions = True}]
 
-withXDomain :: GnuplotDrawable g => g -> (Double, Double) -> [GDrawable]
-withXDomain g t = toGDrawables (\gd -> gd { xDomain = Just t }) g
+withXDomain :: GnuplotDrawable g => g -> (RangeComp Double, RangeComp Double) -> [GDrawable]
+withXDomain g t = toGDrawables (\gd -> gd{xDomain = Just t}) g
 
-withYDomain :: GnuplotDrawable g => g -> (Double, Double) -> [GDrawable]
-withYDomain g t = toGDrawables (\gd -> gd { yDomain = Just t }) g
+withYDomain :: GnuplotDrawable g => g -> (RangeComp Double, RangeComp Double) -> [GDrawable]
+withYDomain g t = toGDrawables (\gd -> gd{yDomain = Just t}) g
 
-withZDomain :: GnuplotDrawable g => g -> (Double, Double) -> [GDrawable]
-withZDomain g t = toGDrawables (\gd -> gd { zDomain = Just t }) g
+withZDomain :: GnuplotDrawable g => g -> (RangeComp Double, RangeComp Double) -> [GDrawable]
+withZDomain g t = toGDrawables (\gd -> gd{zDomain = Just t}) g
 
 withStyle :: GnuplotDrawable g => g -> Style -> [GDrawable]
-withStyle g s = toGDrawables (\gd -> gd { style = s }) g
+withStyle g s = toGDrawables (\gd -> gd{style = s}) g
+
+withNOOP :: GnuplotDrawable g => g -> [GDrawable]
+withNOOP = toGDrawables id
 
 infixl 4 `withXDomain`, `withYDomain`, `withZDomain`, `withStyle`
-
-extractDomain :: [GDrawable] -> (GDrawable -> Maybe (Double, Double)) -> Maybe (Double, Double)
-extractDomain [] f = Nothing
-extractDomain (x : xs) f = do
-  (lrest, rrest) <- extractDomain xs f <|> f x
-  (l, r) <- f x <|> pure (lrest, rrest)
-  pure (min l lrest, max r rrest)
-
-constructCommand :: [GDrawable] -> String
-constructCommand gds = let
-  domain' = extractDomain gds xDomain
-  codomain' = extractDomain gds yDomain
-  thirddomain' = extractDomain gds zDomain
-  hasthird = any threeDimensions gds
-  in
-  (if hasthird then "s" else "") ++
-  "plot " ++
-  maybe "[:] " (\(x,y) -> "[" ++ show x ++ ":" ++ show y ++ "] ") domain' ++
-  maybe "[:] " (\(x,y) -> "[" ++ show x ++ ":" ++ show y ++ "] ") codomain' ++
-  (if hasthird then maybe "[:] " (\(x,y) -> "[" ++ show x ++ ":" ++ show y ++ "] ") thirddomain' else "") ++
-  intercalate ", " (map (\MkGDrawable { expr, style, .. } -> show expr ++ " w " ++ map toLower (show style)) gds)
-

@@ -1,17 +1,23 @@
-cabal-version:   3.0
-name:            gnuplot-dsl
-version:         0.1.0.0
-license:         MIT
-author:          Márton Petes
-maintainer:      tx0lwm@inf.elte.hu
-build-type:      Simple
+cabal-version: 3.0
+name:          gnuplot-dsl
+version:       0.1.0.0
+license:       MIT
+author:        Márton Petes
+maintainer:    tx0lwm@inf.elte.hu
+build-type:    Simple
 
 library
-    build-depends:    base, data-default, process
-    other-modules:
-        Graphics.Gnuplot.DSL
-        Graphics.Gnuplot.DSL.Process
-        Graphics.Gnuplot.DSL.Expr
-        Graphics.Gnuplot.DSL.Drawable
-    hs-source-dirs:   src
-    default-language: GHC2021
+  build-depends:
+    , base
+    , data-default
+    , process
+
+  exposed-modules:
+    Graphics.Gnuplot.DSL
+    Graphics.Gnuplot.DSL.Command
+    Graphics.Gnuplot.DSL.Drawable
+    Graphics.Gnuplot.DSL.Expr
+    Graphics.Gnuplot.DSL.Process
+
+  hs-source-dirs:   src
+  default-language: GHC2021
