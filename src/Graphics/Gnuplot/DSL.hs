@@ -4,6 +4,8 @@ import Graphics.Gnuplot.DSL.Drawable as Gnuplot (
   GDrawable,
   GnuplotDrawable,
   Style (..),
+  RangeComp (..),
+  withNOOP,
   withStyle,
   withXDomain,
   withYDomain,

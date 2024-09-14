@@ -5,12 +5,39 @@ license:       MIT
 author:        Márton Petes
 maintainer:    tx0lwm@inf.elte.hu
 build-type:    Simple
+homepage:      https://github.com/Thrithralas/gnuplot-dsl/
+category:      Graphics, Math
+synopsis:      Plot Haskell functions in GNUPlot using an eDSL
+description:
+  This library is a wrapper around the gnuplot program.
+
+  Simply, open up a GHCi session and import "Graphics.Gnuplot.DSL" and you're ready to go. To plot basically anything that can be plotted, use the "plot" function. It currently supports plotting 2D functions, 3D functions, lists of functions and any of those with styles applied to them. Some examples:
+  .
+  >  plot (\x -> sin (pi * x))
+  >  plot (\x y -> x ** 4 + y ** 4)
+  >  plot [\x -> x ** 3 - x ** 2, exp]
+  >  plot $ sin `withStyle` FilledCurve
+  .
+  To restrict the domain of a function, use the "withXDomain", "withYDomain" and "withZDomain" functions:
+  .
+  >  plot $ cos `withXDomain` (0,3) `withYDomain` (Auto, 1)
+  .
+  The library is a bit limited in its other aspects so far, but it allows setting arbitrary gnuplot variables and printing the generated gnuplot command. Use the "plotWithInit" function to do these:
+  .
+  >  plotWithInit [Set "key" "outside", Toggle "title"] True log
+  .
+
+tested-with: GHC == 9.6.6
+
+source-repository head
+  type:     git
+  location: https://github.com/Thrithralas/gnuplot-dsl/
 
 library
   build-depends:
-    , base
-    , data-default
-    , process
+    , base >= 4.18.2 && < 4.19
+    , data-default >= 0.7.1 && < 0.8
+    , process >= 1.6.19 && < 1.7
 
   exposed-modules:
     Graphics.Gnuplot.DSL

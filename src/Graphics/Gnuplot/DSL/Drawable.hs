@@ -41,6 +41,24 @@ data RangeComp a
   | Auto
   deriving (Generic)
 
+instance Num a => Num (RangeComp a) where
+  RLit a + RLit b = RLit (a + b)
+  _ + _ = Auto
+  RLit a * RLit b = RLit (a * b)
+  _ * _ = Auto
+  RLit a - RLit b = RLit (a - b)
+  _ - _ = Auto
+  signum (RLit a) = RLit (signum a)
+  signum Auto = Auto
+  abs (RLit a) = RLit (abs a)
+  abs Auto = Auto
+  fromInteger = RLit . fromInteger
+
+instance Fractional a => Fractional (RangeComp a) where
+  RLit a / RLit b = RLit (a / b)
+  _ / _ = Auto
+  fromRational = RLit . fromRational
+
 instance Show a => Show (RangeComp a) where
   show (RLit a) = show a
   show Auto = "*"
