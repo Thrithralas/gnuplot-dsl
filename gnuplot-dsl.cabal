@@ -12,20 +12,19 @@ description:
   This library is a wrapper around the gnuplot program.
 
   Simply, open up a GHCi session and import "Graphics.Gnuplot.DSL" and you're ready to go. To plot basically anything that can be plotted, use the "plot" function. It currently supports plotting 2D functions, 3D functions, lists of functions and any of those with styles applied to them. Some examples:
-  .
+  
   >  plot (\x -> sin (pi * x))
   >  plot (\x y -> x ** 4 + y ** 4)
   >  plot [\x -> x ** 3 - x ** 2, exp]
   >  plot $ sin `withStyle` FilledCurve
-  .
+  
   To restrict the domain of a function, use the "withXDomain", "withYDomain" and "withZDomain" functions:
-  .
+  
   >  plot $ cos `withXDomain` (0,3) `withYDomain` (Auto, 1)
-  .
+  
   The library is a bit limited in its other aspects so far, but it allows setting arbitrary gnuplot variables and printing the generated gnuplot command. Use the "plotWithInit" function to do these:
-  .
+  
   >  plotWithInit [Set "key" "outside", Toggle "title"] True log
-  .
 
 tested-with: GHC == 9.6.6
 

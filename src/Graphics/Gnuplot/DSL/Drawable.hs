@@ -1,6 +1,14 @@
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE UndecidableInstances #-}
 
+{-|
+Module      : Graphics.Gnuplot.DSL.Expr
+Copyright   : (c) Márton Petes, 2024
+License     : MIT
+Maintainer  : tx0lwm@inf.elte.hu
+
+This module contains the drawing mechanism and type system magic behind the 'plot' function and the 'GnuplotDrawable' typeclass.
+-}
 module Graphics.Gnuplot.DSL.Drawable (
   Style (..),
   GDrawable (..),
