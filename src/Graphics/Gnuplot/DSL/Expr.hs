@@ -1,11 +1,19 @@
 {-# LANGUAGE TypeFamilies #-}
+{-|
+Module      : Graphics.Gnuplot.DSL.Expr
+Copyright   : (c) Márton Petes, 2024
+License     : MIT
+Maintainer  : tx0lwm@inf.elte.hu
 
+The definition of the eDSL's syntax. The constructors of the eDSL should rarily be used outside of this module. If you need to invoke a custom function, use the 'func' function.
+-}
 module Graphics.Gnuplot.DSL.Expr where
 
 import Data.Data
 import Data.Default
 import GHC.Generics
 
+-- | An expression in gnuplot, the eDSL the project keeps mentioning. The type supports arbitrary free variables which is used to convert from the lambda functions passed to 'plot'. When a function is flattened into a single 'GExpr', it's passed a parameter to turn it into a single expression with free variables. This is later converted to a string and sent to gnuplot.
 data GExpr a
   = Lit a
   | Var String
@@ -20,6 +28,7 @@ data GExpr a
 instance Default (GExpr a) where
   def = Var "x"
 
+-- | Call a function by name that is not in this library, but available in gnuplot (like gamma).
 func :: String -> GExpr a -> GExpr a
 func = (:$)
 
@@ -54,9 +63,13 @@ instance Floating a => Floating (GExpr a) where
   acosh = func "acosh"
   atanh = func "atanh"
 
+
 ground, gceil, gfloor :: GExpr a -> GExpr a
+-- | Rounding, but for gnuplot expressions.
 ground = func "round"
+-- | Ceiling, but for gnuplot expressions.
 gceil = func "ceil"
+-- | Floor, but for gnuplot expressions.
 gfloor = func "floor"
 
 instance Show a => Show (GExpr a) where

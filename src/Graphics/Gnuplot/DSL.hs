@@ -1,5 +1,12 @@
 module Graphics.Gnuplot.DSL (module Gnuplot) where
+{-|
+Module      : Graphics.Gnuplot.DSL
+Copyright   : (c) Márton Petes, 2024
+License     : MIT
+Maintainer  : tx0lwm@inf.elte.hu
 
+The primary module you should be working with when rendering simple functions, see the individual modules for further detail.
+-}
 import Graphics.Gnuplot.DSL.Drawable as Gnuplot (
   GDrawable,
   GnuplotDrawable,

@@ -1,3 +1,11 @@
+{-|
+Module      : Graphics.Gnuplot.DSL.Process
+Copyright   : (c) Márton Petes, 2024
+License     : MIT
+Maintainer  : tx0lwm@inf.elte.hu
+
+Module for running the gnuplot process and sending the eDSL to it.
+-}
 module Graphics.Gnuplot.DSL.Process (
   plot,
   plotDebug,
@@ -15,7 +23,12 @@ import Graphics.Gnuplot.DSL.Expr
 import System.Exit
 import System.Process
 
-gnuplotExec :: [GCommand] -> Bool -> IO ()
+
+-- | Execute a series of Gnuplot commands.
+gnuplotExec ::
+  [GCommand] -> -- ^ The series of commands to run
+  Bool -> -- ^ Wether to print the generated commands passed to gnuplot
+  IO ()
 gnuplotExec cmds printoutput = do
   let commands = intercalate ";" (map show cmds)
   when printoutput $ putStrLn commands
@@ -37,7 +50,13 @@ extractDomain (x : xs) f = do
     rmin Auto x = x
     rmin x Auto = x
 
-plotWithInit :: GnuplotDrawable g => [GCommand] -> Bool -> g -> IO ()
+-- | Plot something with a set of inital commands.
+plotWithInit ::
+  GnuplotDrawable g =>
+  [GCommand] -> -- ^ The series of commands to run before plotting the function(s)
+  Bool -> -- ^ Wether to print the generated commands passed to gnuplot
+  g -> -- ^ The thing(s) to plot
+  IO ()
 plotWithInit init printoutput drawable =
   let
     drawables = toGDrawables id drawable
@@ -50,8 +69,30 @@ plotWithInit init printoutput drawable =
    in
     gnuplotExec (init ++ [plotfunc]) printoutput
 
+-- | Plot something. You can pass any of the following things to this function:
+--
+-- - A unary function:
+--
+-- > plot (\x -> x ** 2 + 2 * x + 1)
+--
+-- - A binary function:
+--
+-- > plot (\x y -> x * y + x / y)
+--
+-- - Multiple functions
+--
+-- > plot [\x -> sin x, \x -> cos x]
+--
+-- - Stylized function(s)
+--
+-- > plot $ (\x -> x ** 3 + 2) `withXDomain` (0, Auto)
+--
+-- Note that some gnuplot functions don't yet have eDSL equivalents. In the meantime, you can use the 'func' function to create arbitrary invocations
+--
+-- > plot (\x -> func "gamma" x)
 plot :: GnuplotDrawable g => g -> IO ()
 plot = plotWithInit [] False
 
+-- | Same as 'plot', but also prints the function sent to gnuplot to stdout.
 plotDebug :: GnuplotDrawable g => g -> IO ()
 plotDebug = plotWithInit [] True
